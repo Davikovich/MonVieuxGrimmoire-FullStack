@@ -1,19 +1,16 @@
+// Backend/middleware/auth.js
 const jwt = require('jsonwebtoken');
- 
-// Middleware d'authentification
+const JWT_SECRET = process.env.JWT_SECRET || 'CHANGE_ME_IN_ENV';
+
 module.exports = (req, res, next) => {
-   try {
-        // Extraction du token du header Authorization de la requête
-        const token = req.headers.authorization.split(' ')[1];
-        // Décodage du token
-        const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET');
-        // Extraction de l'ID de l'utilisateur qui est maintenant authentifié
-        const userId = decodedToken.userId;
-        req.auth = {
-            userId: userId
-        };
-	next();
-   } catch(error) {
-        res.status(401).json({ error });
-   }
+  try {
+    const header = req.headers.authorization || '';
+    const token = header.startsWith('Bearer ') ? header.slice(7) : header.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Token manquant' });
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.auth = { userId: decoded.userId };
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: 'Token invalide' });
+  }
 };

@@ -1,51 +1,56 @@
-const bcrypt = require('bcrypt');
-const User = require('../models/user');
+// controllers/user.js
+const bcrypt = require('bcryptjs'); // ou 'bcrypt'
 const jwt = require('jsonwebtoken');
+const User = require('../models/user');
 
-// POST => Création de compte
-exports.signup = (req, res, next) => {
-    // Appel de la fonction de hachage de bcrypt dans le MDP (qui est "salé" 10 fois)
-    bcrypt.hash(req.body.password, 10)
-    // Utilisation du hash pour créer un utilisateur
-      .then(hash => {
-        // Création d'une instance du modèle User
-        const user = new User({
-          email: req.body.email,
-          password: hash
-        });
-        // Enregistrement dans la base de données
-        user.save()
-          .then(() => res.status(201).json({ message: 'Utilisateur créé !' }))
-          .catch(error => res.status(400).json({ error }));
-      })
-      .catch(error => res.status(500).json({ error }));
+const JWT_SECRET = process.env.JWT_SECRET || 'CHANGE_ME_IN_ENV';
+
+// POST /api/auth/signup
+exports.signup = async (req, res) => {
+  try {
+    const { email = '', password } = req.body;
+    if (!email.trim() || !password) {
+      return res.status(400).json({ message: 'Email et mot de passe requis' });
+    }
+
+    const emailNorm = email.trim().toLowerCase();  // <- normalisation
+    const hash = await bcrypt.hash(password, 10);
+    const user = await User.create({ email: emailNorm, password: hash });
+
+    return res.status(201).json({ id: user._id });
+  } catch (err) {
+    if (err && err.code === 11000) {
+      return res.status(409).json({ message: 'Email déjà utilisé' });
+    }
+    if (err?.name === 'ValidationError') {
+      return res.status(400).json({ message: err.message });
+    }
+    console.error(err);
+    return res.status(500).json({ message: 'Erreur serveur' });
+  }
 };
 
-// POST => Connexion
-exports.login = (req, res, next) => {
-    // Vérification de l'existence de l'utilisateur dans notre base de données
-    User.findOne({ email: req.body.email })
-        .then(user => {
-            if (!user) {
-                return res.status(401).json({ error: 'Utilisateur non trouvé !' });
-            }
-            // Comparaison du mot de passe entré avec le hash de la base de données
-            bcrypt.compare(req.body.password, user.password)
-                .then(valid => {
-                    if (!valid) {
-                        return res.status(401).json({ error: 'Mot de passe incorrect !' });
-                    }
-                    // Si les informations sont valides, nous renvoyons une réponse contenant userId et un token crypté
-                    res.status(200).json({
-                        userId: user._id,
-                        token: jwt.sign(
-                            { userId: user._id },
-                            'RANDOM_TOKEN_SECRET',
-                            { expiresIn: '24h' }
-                        )
-                    });
-                })
-                .catch(error => res.status(500).json({ error }));
-        })
-        .catch(error => res.status(500).json({ error }));
+// POST /api/auth/login
+exports.login = async (req, res) => {
+  try {
+    const { email = '', password } = req.body;
+    const emailNorm = email.trim().toLowerCase();
+
+    // Si dans ton schéma: password { select: false }, utilise .select('+password')
+    const user = await User.findOne({ email: emailNorm });
+    if (!user) {
+      return res.status(401).json({ error: 'Utilisateur non trouvé !' });
+    }
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return res.status(401).json({ error: 'Mot de passe incorrect !' });
+    }
+
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '24h' });
+    return res.status(200).json({ userId: user._id, token });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Erreur serveur' });
+  }
 };

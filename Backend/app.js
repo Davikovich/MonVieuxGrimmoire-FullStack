@@ -1,37 +1,33 @@
+// Backend/app.js
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const booksRoutes = require('./routes/books');
-const userRoutes = require('./routes/user');
+const userRoutes  = require('./routes/user');
 const path = require('path');
-const password = require('./utils/password')
+// ⚠️ SUPPRIMER : const password = require('./utils/password');
 
-// Connexion à la base de données
-mongoose.connect(`mongodb+srv://davikovich:Cr7mendes@cluster0.jhbqtj3.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`,
-  { useNewUrlParser: true,
-    useUnifiedTopology: true })
-  .then(() => console.log('Connexion à MongoDB réussie !'))
-  .catch(() => console.log('Connexion à MongoDB échouée !'));
-
-// Création de l'application
 const app = express();
-// Middleware permettant à Express d'extraire le corps JSON des requêtes POST
-app.use(express.json());
 
-// Middleware gérant les erreurs de CORS
+// Body parsers (OBLIGATOIRE pour /auth en JSON)
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// CORS basique
 app.use((req, res, next) => {
-    // Accès à notre API depuis n'importe quelle origine
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    // Autorisation d'ajouter les headers mentionnés aux requêtes envoyées vers notre API
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
-    // Autorisation d'envoyer des requêtes avec les méthodes mentionnées
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    next();
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers','Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Methods','GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  next();
 });
 
-// Gestion de la ressource images de manière statique
-app.use('/images', express.static(path.join(__dirname, 'images')));
+// Connexion MongoDB (⚠️ l’URI DOIT venir de l’env)
+const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/monvieuxgrimoire';
+mongoose.connect(uri, { /* options par défaut OK */ })
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err.message));
 
-// Enregistrement des routeurs
+app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/api/auth', userRoutes);
 app.use('/api/books', booksRoutes);
 
