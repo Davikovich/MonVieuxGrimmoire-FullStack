@@ -22,10 +22,19 @@ app.use((req, res, next) => {
 });
 
 // Connexion MongoDB (⚠️ l’URI DOIT venir de l’env)
-const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/monvieuxgrimoire';
-mongoose.connect(uri, { /* options par défaut OK */ })
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err.message));
+const connexion = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_CLUSTER}/?retryWrites=true&w=majority&appName=Cluster0`;
+// console.log(connexion);
+mongoose
+  .connect(
+    connexion,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
+  .then(() => console.log("Connexion à MongoDB réussie !"))
+  .catch(() => console.log("Connexion à MongoDB échouée !"));
+
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/api/auth', userRoutes);
