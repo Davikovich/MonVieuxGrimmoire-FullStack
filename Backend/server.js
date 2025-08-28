@@ -1,6 +1,7 @@
 const http = require('http');
 const app  = require('./app');
 
+// “fonction pour transformer le port en nombre ou garder la valeur”.
 const normalizePort = v => {
   const p = parseInt(v, 10);
   if (Number.isNaN(p)) return v;
@@ -10,6 +11,7 @@ const normalizePort = v => {
 const port = normalizePort(process.env.PORT || 4000);
 app.set('port', port);
 
+// “gestion des erreurs au démarrage (port déjà utilisé, droits, etc.)”
 const errorHandler = error => {
   if (error.syscall !== 'listen') throw error;
   const bind = typeof port === 'string' ? 'pipe ' + port : 'port ' + port;
@@ -20,6 +22,7 @@ const errorHandler = error => {
   }
 };
 
+// “création du serveur à partir d'express”
 const server = http.createServer(app);
 server.on('error', errorHandler);
 server.on('listening', () => {
@@ -28,4 +31,5 @@ server.on('listening', () => {
   console.log('Listening on ' + bind);
 });
 
+// “démarre l’écoute du serveur”
 server.listen(port);

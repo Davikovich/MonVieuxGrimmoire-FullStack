@@ -1,5 +1,5 @@
 // controllers/user.js
-const bcrypt = require('bcryptjs'); // ou 'bcrypt'
+const bcrypt = require('bcryptjs'); 
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
@@ -36,7 +36,7 @@ exports.login = async (req, res) => {
     const { email = '', password } = req.body;
     const emailNorm = email.trim().toLowerCase();
 
-    // Si dans ton schéma: password { select: false }, utilise .select('+password')
+    
     const user = await User.findOne({ email: emailNorm });
     if (!user) {
       return res.status(401).json({ error: 'Utilisateur non trouvé !' });

@@ -1,10 +1,10 @@
-const express = require('express');
-const router = express.Router();
+const express = require('express'); //“crée un routeur Express”
+const router = express.Router(); //“crée une instance de routeur”
 
-const auth = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const auth = require('../middleware/auth'); //“middleware d’authentification JWT”
+const upload = require('../middleware/upload'); //“middleware pour upload d’images”
 
-const booksCtrl = require('../controllers/books')
+const booksCtrl = require('../controllers/books') 
 
 // Logique des routes books
 router.get('/', booksCtrl.getAllBooks);

@@ -1,17 +1,16 @@
 // Backend/app.js
-require('dotenv').config();
+require('dotenv').config(); //“charge les variables d’env depuis .env”
 const express = require('express');
 const mongoose = require('mongoose');
 const booksRoutes = require('./routes/books');
 const userRoutes  = require('./routes/user');
 const path = require('path');
-// ⚠️ SUPPRIMER : const password = require('./utils/password');
 
 const app = express();
 
 // Body parsers (OBLIGATOIRE pour /auth en JSON)
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: true })); 
 
 // CORS basique
 app.use((req, res, next) => {
@@ -36,8 +35,8 @@ mongoose
   .catch(() => console.log("Connexion à MongoDB échouée !"));
 
 
-app.use('/images', express.static(path.join(__dirname, 'images')));
-app.use('/api/auth', userRoutes);
-app.use('/api/books', booksRoutes);
+app.use('/images', express.static(path.join(__dirname, 'images'))); //“rend le dossier images statique et accessible depuis /images”
+app.use('/api/auth', userRoutes); //“routes pour l’authentification”
+app.use('/api/books', booksRoutes); //“routes pour les livres”
 
 module.exports = app;

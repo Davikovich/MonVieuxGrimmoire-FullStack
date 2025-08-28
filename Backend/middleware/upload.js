@@ -1,9 +1,9 @@
-const multer = require('multer');
+const multer = require('multer'); 
 const sharp = require('sharp');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs'); 
 
-const MIME_TYPES = {
+const MIME_TYPES = { // Types MIME acceptés
   'image/jpg': 'jpg',
   'image/jpeg': 'jpg',
   'image/png': 'png'
