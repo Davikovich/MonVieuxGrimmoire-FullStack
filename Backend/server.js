@@ -8,11 +8,11 @@ const normalizePort = v => {
   if (p >= 0) return p;
   return false;
 };
-const port = normalizePort(process.env.PORT || 4000);
+const port = normalizePort(process.env.PORT || 4000); //“définit le port d’écoute”
 app.set('port', port);
 
 // “gestion des erreurs au démarrage (port déjà utilisé, droits, etc.)”
-const errorHandler = error => {
+const errorHandler = error => { 
   if (error.syscall !== 'listen') throw error;
   const bind = typeof port === 'string' ? 'pipe ' + port : 'port ' + port;
   switch (error.code) {

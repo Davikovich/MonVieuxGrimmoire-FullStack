@@ -20,15 +20,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// Connexion MongoDB (⚠️ l’URI DOIT venir de l’env)
+// Connexion MongoDB 
 const connexion = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_CLUSTER}/?retryWrites=true&w=majority&appName=Cluster0`;
-// console.log(connexion);
+
 mongoose
-  .connect(
-    connexion,
+  .connect( // Connexion à la base de données
+    connexion, // URI de connexion
     {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      useNewUrlParser: true, // Utilise le nouveau parser d'URL
+      useUnifiedTopology: true, // Utilise le nouveau moteur de gestion des connexions
     }
   )
   .then(() => console.log("Connexion à MongoDB réussie !"))
